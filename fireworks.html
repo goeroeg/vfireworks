@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Fireworks</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, height=device-height, user-scalable=0, minimum-scale=1, maximum-scale=1">
+		<style>
+			body {
+				background-color: rgb(0, 0, 0);
+				color: #000;
+				margin: 0px;
+  				overflow: hidden;
+
+				width: 100vw;
+				height: 100vh;
+
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			    }
+
+			a:link, a:visited {
+				color: white;
+				padding: 5px 5px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				}
+
+			a:hover, a:active {
+				background-color: rgba(255,255,255,0.3);
+				}
+
+			kbd {
+				font-size: 2vh;
+				border-radius: 0.5vh;
+				box-shadow: 0.1vh 0.1vh 0.2vh lightcyan;
+				border: 0.25vh solid yellowgreen;
+				display: inline-block;
+				padding: 0.1vh 1.2vw;
+				margin-top: 1vh;
+			}
+
+			#fpsLabel {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				width: 50%;
+				text-align: left;
+				z-index: 100;
+				display:block;
+				text-align: left;
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 3.5vh;
+			}
+
+			#blocker {
+				display: none;
+				position: fixed;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0,0,0,0.7);
+				z-index: 200;
+			}
+
+			#instructions span {
+					display: inline-block;
+					line-height: 3.5vh;
+				}
+
+			#instructions small {
+				font-size: 1.5vh;
+				}
+
+			#instructions {
+				width: 100%;
+				height: 100%;
+
+				display: -webkit-box;
+				display: -moz-box;
+				display: box;
+
+				text-shadow: 0 0 1px cyan, 0 0 5px darkcyan;
+
+				-webkit-box-orient: horizontal;
+				-moz-box-orient: horizontal;
+				box-orient: horizontal;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+
+				-webkit-box-align: center;
+				-moz-box-align: center;
+				box-align: center;
+
+				color: #ffffff;
+				text-align: center;
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 2.5vh;
+				line-height: 2.8vh;
+
+				cursor: pointer;
+				z-index: 200;
+			}
+
+			#touchPause {
+				display: none;
+				position: absolute;
+
+				width: 5vw;
+				height: 5vw;
+
+				top: 1%;
+				right: 2%;
+
+				font-size: 5vw;
+
+				text-shadow: 0 0 1px cyan, 0 0 5px darkcyan;
+				color: #ffffff;
+				text-align: center;
+				font-family: Arial, Helvetica, sans-serif;
+
+				z-index: 250;
+			}
+
+			#touchControls {
+				position: absolute;
+
+				width: 100%;
+				height: 25vw;
+
+				bottom: 1%;
+
+				display: none;
+
+
+				text-shadow: 0 0 1px cyan, 0 0 5px darkcyan;
+
+				-webkit-box-align: center;
+				-moz-box-align: center;
+				box-align: center;
+
+				color: #ffffff;
+				text-align: center;
+				font-family: sans-serif;
+			}
+
+			#movementControls {
+				position: absolute;
+				left: 1%;
+				bottom: 2%;
+
+				display: inherit;
+
+				-webkit-box-orient: vertical;
+				-moz-box-orient: vertical;
+				box-orient: vertical;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+			}
+
+			#touchControls kbd {
+				height: 5vw;
+				width: 6vw;
+
+				margin: 0.3vw;
+				padding: 1vw;
+
+				text-align: center;
+
+				font-size: 5vw;
+				line-height: 5vw;
+
+				box-shadow: -0.5px 0.5px 4px rgba(0,0,0,0.75);
+				border: 2px solid rgba(128,128,128,0.8);
+				border-radius: 10%;
+
+				background-image: radial-gradient(circle,  rgba(0,0,0,0) 20%, rgba(0,0,0,0.25), rgba(85,85,85,0.8));
+
+				cursor: pointer;
+			}
+
+			#touchControls span {
+				display: inherit;
+
+				-webkit-box-orient: horizontal;
+				-moz-box-orient: horizontal;
+				box-orient: horizontal;
+
+				-webkit-box-pack:center;
+				-moz-box-pack: center;
+				box-pack: center;
+			}
+
+			#miscControls {
+				position: absolute;
+				left: 39%;
+				bottom: 2%;
+
+				display: inherit;
+
+				-webkit-box-orient: vertical;
+				-moz-box-orient: vertical;
+				box-orient: vertical;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+			}
+
+			#miscControls kbd {
+				height: 4vw;
+				width: 8vw;
+
+				font-size: 3vw;
+				line-height: 4vw;
+			}
+
+			#cameraControls {
+				position: absolute;
+				right: 1%;
+				bottom: 2%;
+
+				display: inherit;
+				width: 20vw;
+				height: 20vw;
+
+				-moz-border-radius: 50%;
+				-webkit-border-radius: 50%;
+				border-radius: 50%;
+
+				-webkit-box-orient: vertical;
+				-moz-box-orient: vertical;
+				box-orient: vertical;
+
+				-webkit-box-pack:justify;
+				-moz-box-pack: justify;
+				box-pack: justify;
+
+				box-shadow: 0.5px 0.5px 4px rgba(0,0,0,0.75);
+				border: 2px solid rgba(128,128,128,0.8);
+
+				background-image: radial-gradient(circle,  rgba(0,0,0,0) 20%, rgba(0,0,0,0.25), rgba(85,85,85,0.8));
+
+				font-size: 3vw;
+				line-height: 3vw;
+
+				cursor: pointer;
+			}
+
+			#cameraControls span {
+				padding: 2%;
+
+				display: inherit;
+
+				-webkit-box-pack:justify;
+				-moz-box-pack: justify;
+				box-pack: justify;
+			}
+
+			#guiContainer {
+				position: absolute;
+				top: 0px;
+				right: 20px;
+			}
+
+			#leftCanvas {
+				display: inherit;
+				position: absolute;
+				/* background-color: red; */
+				top: 20%;
+				left: 5px;
+				width: 35%;
+				height: 60%;
+				z-index: -1;
+			}
+
+			#rightCanvas {
+				display: inherit;
+				position: absolute;
+				/* background-color: red; */
+				top: 20%;
+				right: 5px;
+				width: 35%;
+				height: 60%;
+				z-index: -1;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="fpsLabel">- FPS</div>
+		<div id="touchPause">&#8285;</div>
+		<div id="blocker">
+			<div id="instructions">
+				<!--
+				<span style="font-size:3vh; color: lime">A virtual nativity scene...</span>
+				<br/>
+				<span style="color: lime; font-family:monospace; font-size:2vh">v. 0.1.8</span>
+				<br/><br/>
+				<span id="clickSpan" style="font-size:4vh">&#9658; Click to explore</span>
+				<br/><br/>
+				Move:&nbsp;<span><kbd>W</kbd><br/><kbd>A</kbd>&nbsp;<kbd>S</kbd>&nbsp;<kbd>D</kbd></span>
+				&nbsp;or&nbsp;
+				<span><kbd>&#9651;</kbd><br/><kbd>&#9665;</kbd>&nbsp;<kbd>&#9661;</kbd>&nbsp;<kbd>&#9655;</kbd><br/></span>
+				<br/><br/>
+				Jump:&nbsp;<kbd>SPACE</kbd>
+				<br/><br/>
+				Toggle night:&nbsp;<kbd>N</kbd>&nbsp;, toggle season:&nbsp;<kbd>M</kbd><br/>
+				<br/>
+				Look: &#128432; mouse<br/>
+				<br/>
+				Release controls / Pause:&nbsp;<kbd>ESC</kbd>
+				<br/>
+				Toggle fullscreen:&nbsp;<kbd>F11</kbd>&nbsp;<small><i>(in most browsers)</i></small>
+				<br/><br/>
+				-->
+				<a id="infoLink" href="https://goeroeg.github.io/ld-nativity/" target="_blank">&#9432; <i>More info and licenses</i></a>
+			</div>
+			<div id="guiContainer">
+				<div id="reloadHint" style="color: lightgrey; font-family:monospace; font-size: x-small;">
+					<br/><br/>
+					params with * require reloading
+				</div>
+			</div>
+		</div>
+		<div id="touchControls">
+			<div id="movementControls">
+				<kbd id="touchForward">&#9651;</kbd></br>
+				<span>
+					<kbd id="touchLeft">&#9665;</kbd>&nbsp;
+					<kbd id="touchBack">&#9661;</kbd>&nbsp;
+					<kbd id="touchRight">&#9655;</kbd>
+				</span>
+			</div>
+			<div id="miscControls">
+				<span>
+					<kbd id="touchSeason">&#9969;/&#9731;</kbd>
+					<kbd id="touchDayNight">&#9788;/&#9789;</kbd>
+				</span>
+			</div>
+			<div id="cameraControls">
+				<div >&#9652;</div><span><div>&#9666;</div><div>&#9656;</div></span><div>&#9662;</div>
+			</div>
+		</div>
+		<script type="module" src="fireworks.js"></script>
+    </body>
+</html>
