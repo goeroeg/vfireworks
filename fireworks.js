@@ -259,7 +259,6 @@ function initControls() {
 
 
 function initTouchControls(hide) {
-    console.log("inittouch hide:" + hide);
     if (hide) {
         document.getElementById('touchControls').style.display = 'none';
 
@@ -386,9 +385,6 @@ function startGame() {
     walkClock.start();
     gameActive = true;
 
-    SFX.resume();
-
-    //MSX.play(SFX.listener);
 }
 
 function updateFPSLabel() {
