@@ -6,6 +6,7 @@ import { PointerLockControls } from './web_modules/three/examples/jsm/controls/P
 //import { EffectComposer } from './web_modules/three/examples/jsm/postprocessing/EffectComposer.js';
 //import { RenderPass } from './web_modules/three/examples/jsm/postprocessing/RenderPass.js';
 //import { SMAAPass } from './web_modules/three/examples/jsm/postprocessing/SMAAPass.js';
+//import { UnrealBloomPass } from './web_modules/three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 import * as WORLD from './gfx/World.js';
 import * as ANIM from './gfx/Animations.js';
@@ -13,8 +14,8 @@ import * as SFX from './audio/SoundFX.js';
 // import * as MSX from './audio/Music.js';
 import * as PTFX from './gfx/ParticleEffects.js';
 
-var controls, gpControls, composer;
-var renderer;
+var controls;
+var renderer, composer;
 var scene;
 var camera;
 var particleSystems = [];
@@ -61,31 +62,21 @@ var progressBarDiv;
 
 var isTouch = ('ontouchstart' in window);
 
-var resolutions = [{ x: 0, y: 0 }, { x: 320, y: 240 }, {x: 640, y: 480 }, { x: 1024, y: 768 }, { x: 1280, y: 800 }, { x: 1920, y: 1080 }];
-var resolutionNames  = { 'Auto': 0, '320x240': 1, '640x480': 2, '1024x768': 3, "1280x800": 4, "1920x1080": 5 };
-var qualityNames = { High: 1, Low : 2};
 var audioSettings = { enabled : true, volume: 100 };
-var gamepadSettings = { enabled: true, moveSensitivity: 1, lookSensitivity: 1 };
-var gfxSettings = { resolution: resolutionNames.Auto, quality: qualityNames.High, fullScreen: false, shadows: isTouch ? 0 : 3 , antiAlias: true , showFPS: false};
+var gfxSettings = { shadows: isTouch ? 0 : 3 , antiAlias: true , showFPS: false};
 
-var gui, gfxFolder, controlsFolder, audioFolder, gameFolder;
-
-var blocker = document.getElementById( 'blocker' );
-var instructions = document.getElementById( 'instructions' );
+var colors = [0xffffff, 0xff4444, 0x44ff44, 0x6666ff, 0xffff66];
 
 var fpsLabel = document.getElementById('fpsLabel');
 
-var touchPause = document.getElementById('touchPause');
 var touchMoveForward = document.getElementById('touchForward');
 var touchMoveBack = document.getElementById('touchBack');
 var touchMoveLeft = document.getElementById('touchLeft');
 var touchMoveRight = document.getElementById('touchRight');
-var touchToggleSeason = document.getElementById('touchSeason');
-var touchToggleDayNight = document.getElementById('touchDayNight');
+var touchCameraControls = document.getElementById('cameraControls');
 
 const touchControlDirs = new Map();
 var touchMoveTime;
-var touchCameraControls = document.getElementById('cameraControls');
 var touchCamPos = new THREE.Vector2();
 var mouseMove = false;
 var mouseMovePos = new THREE.Vector2();
@@ -102,9 +93,7 @@ var gameActive = false;
 init();
 
 function init() {
-    initTouchControls(true);
     initScene();
-    initGUI();
     initControls();
     initAudio();
     applyInitialSettings();
@@ -137,11 +126,21 @@ function applyInitialSettings() {
 function initControls() {
 
     renderer = new THREE.WebGLRenderer( { antialias: gfxSettings.antiAlias } );
+    //composer = new EffectComposer(renderer);
+
     if (!isTouch) {
         renderer.setPixelRatio( window.devicePixelRatio );
+        if (composer) {
+            composer.setPixelRatio( window.devicePixelRatio );
+        }
     }
 
     renderer.setSize( window.innerWidth, window.innerHeight );
+    if (composer) {
+        composer.setSize( window.innerWidth, window.innerHeight );
+    }
+
+
     // updateShadows(gameSettings.shadow);
 
     renderer.domElement.setAttribute('style', "position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; margin: auto");
@@ -153,10 +152,22 @@ function initControls() {
     camera.up = new THREE.Vector3(0, 1, 0);
 
     camera.position.set(0, playerCamHeight, WORLD.worldPlates * WORLD.plateSize);
-    camera.rotateX(Math.PI / 180 * 15);
+    camera.rotateX(Math.PI / 180 * 20);
 
-    // initComposer();
+/*
+    const renderScene = new RenderPass( scene, camera );
 
+    const bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+    bloomPass.threshold = 0.2;
+    bloomPass.strength = 1;
+    bloomPass.radius = 0;
+
+    const smaaPass = new SMAAPass(window.innerWidth, window.innerHeight );
+
+    //composer.addPass( renderScene );
+    //composer.addPass( bloomPass );
+    //composer.addPass( smaaPass );
+*/
     controls = new PointerLockControls( camera, document.body );
 
     scene.add( controls.getObject() );
@@ -165,32 +176,14 @@ function initControls() {
         e.stopPropagation();
     });
 
-    /*
-    if (isTouch) {
-        instructions.addEventListener('click', function (e) {
-            openFullscreen();
-            window.history.pushState({}, 'pause');
-            startGame();
-        }, false);
+    document.getElementById('fullScreen').addEventListener('click', e=> {
+        toggleFullScreen(e);
+    });
 
-        window.addEventListener('popstate', function() {
-            pauseGame();
-        });
+    document.getElementById('toggleAudio').addEventListener('click', e=> {
+        toggleAudio(e);
+    });
 
-    } else {
-        instructions.addEventListener('click', function () {
-            controls.lock();
-        }, false);
-
-        controls.addEventListener('lock', function () {
-            startGame();
-        });
-
-        controls.addEventListener('unlock', function () {
-            pauseGame();
-        });
-    }
-*/
     var onKeyDown = function ( event ) {
         //console.log("down " + event.keyCode);
         switch ( event.keyCode ) {
@@ -267,11 +260,9 @@ function initControls() {
 
 
 function initTouchControls(hide) {
+    console.log("inittouch hide:" + hide);
     if (hide) {
         document.getElementById('touchControls').style.display = 'none';
-
-        touchPause.style.display = 'none';
-        touchPause.removeEventListener("click", onTouchPauseClick);
 
         touchCameraControls.removeEventListener("touchstart", onCamControlsTouch);
         touchCameraControls.removeEventListener("touchmove", onCamControlsTouchMove);
@@ -289,15 +280,11 @@ function initTouchControls(hide) {
         touchMoveRight.removeEventListener("touchstart", onMoveControlTouch);
         touchMoveRight.removeEventListener("touchend", onMoveControlRelease);
 
-        touchToggleSeason.removeEventListener("click", onToggleSeasonClick);
-        touchToggleDayNight.removeEventListener("click", onToggleDayNightClick);
+        document.removeEventListener('touch', onDocumentClick, false);
     } else {
         document.getElementById('touchControls').style.display = '-webkit-box';
         document.getElementById('touchControls').style.display = '-moz-box';
         document.getElementById('touchControls').style.display = 'box';
-
-        touchPause.style.display = 'block';
-        touchPause.addEventListener("click", onTouchPauseClick);
 
         touchCameraControls.addEventListener("touchstart", onCamControlsTouch, false);
         touchCameraControls.addEventListener("touchmove", onCamControlsTouchMove, false);
@@ -320,17 +307,8 @@ function initTouchControls(hide) {
         touchMoveRight.addEventListener("touchstart", onMoveControlTouch, false);
         touchMoveRight.addEventListener("touchend", onMoveControlRelease, false);
 
-        touchToggleSeason.addEventListener("click", onToggleSeasonClick, false);
-        touchToggleDayNight.addEventListener("click", onToggleDayNightClick, false);
+        document.addEventListener('touch', onDocumentClick, false);
     }
-}
-
-function onTouchPauseClick(e) {
-    e.preventDefault();
-    highlightTouchControl(touchPause);
-    window.history.back();
-    // pauseGame();
-    resetTouchControl(touchPause);
 }
 
 function onCamControlsTouchMove(e) {
@@ -353,11 +331,6 @@ function onCamControlsTouch(e) {
 function onCamControlsRelease(e) {
     e.preventDefault();
     resetTouchControl(touchCameraControls);
-
-    let touch = e.changedTouches[0];
-    if (currentHighlight && ((touchCamPos.x - touch.pageX) * (touchCamPos.y - touch.pageY)) < 10) {
-        evaluateAnswer(currentHighlight);
-    }
 }
 
 function onMoveControlTouch(e) {
@@ -397,23 +370,8 @@ function toggleMove(activate, moveDirIndex, control) {
     moveActive[moveDirIndex] = activate;
 }
 
-function pauseGame() {
-    gameActive = false;
-    initTouchControls(true);
-    updateBlocker(false);
-
-    SFX.pause();
-
-    animClock.stop();
-    walkClock.stop();
-    document.removeEventListener('click', onDocumentClick);
-    touchCameraControls.removeEventListener('click', onDocumentClick);
-}
-
 function startGame() {
     requestAnimationFrame(animate);
-
-    updateBlocker(true);
 
     initTouchControls(!isTouch);
 
@@ -434,97 +392,6 @@ function startGame() {
     //MSX.play(SFX.listener);
 }
 
-function updateBlocker(hide) {
-    if (hide) {
-        instructions.style.display = 'none';
-        blocker.style.display = 'none';
-    } else {
-        blocker.style.display = 'block';
-        instructions.style.display = '';
-    }
-}
-
-function initGUI() {
-    gui = new GUI( { autoPlace: false } );
-
-    gui.useLocalStorage = true;
-    gui.remember(gfxSettings);
-    gui.remember(audioSettings);
-    gui.remember(gamepadSettings);
-
-    gfxFolder = gui.addFolder ("Graphics settings");
-
-    gfxFolder.add(gfxSettings, "resolution", resolutionNames).name("Resolution").onChange(function() {
-        // update resolution
-        onWindowResize();
-    });
-
-    gfxFolder.add(gfxSettings, "quality", qualityNames).name("Render quality").onChange(function() {
-        // update resolution
-        onWindowResize();
-    });
-
-    gfxFolder.add(gfxSettings, "antiAlias").name("*Antialiasing");//.onChange(function(value) {
-        // would need to reset context - so it's a bit complex
-    //});
-
-    // does not work when starting fullscreen with F11 :(
-    /*
-    gfxFolder.add(gfxSettings, "fullScreen").name("Full screen").onChange(function(value) {
-
-        if (value) {
-            openFullscreen();
-        } else {
-            closeFullscreen();
-        }
-
-        //toggleFullScreen();
-    }).listen();
-    */
-
-    gfxFolder.add(gfxSettings, "shadows", 0, 3, 1).name("Shadows").onChange(function(value) {
-        // update shadows
-        updateShadows(value);
-        preRender();
-    });
-
-    gfxFolder.add(gfxSettings, "showFPS").name("Show FPS").onChange(function(){
-            updateFPSLabel();
-    });
-
-    audioFolder = gui.addFolder("Audio settings");
-    audioFolder.add(audioSettings, "enabled").name("Enabled").onChange(function () {
-        setMasterVolume();
-    });
-    audioFolder.add(audioSettings, "volume", 0, 100).name("Volume").step(1).onChange(function () {
-        setMasterVolume();
-    });
-
-    controlsFolder = gui.addFolder("Gamepad settings");
-    controlsFolder.add(gamepadSettings, "enabled").name("Enabled").onChange(setGamepadEnabled);
-    controlsFolder.add(gamepadSettings, "moveSensitivity", 0.1, 2).step(0.1).name("Move sensitivity").onChange(function (value) {
-        gpControls.moveSensitivity = value;
-    });
-
-    controlsFolder.add(gamepadSettings, "lookSensitivity", 0.1, 2).step(0.1).name("Look sensitivity").onChange(function (value) {
-        gpControls.lookSensitivity = value;
-    });
-
-    if (isElectronApp) {
-        gui.add(window, "close").name("Exit game");
-    }
-
-    gui.close();
-
-    let guiContainer = document.getElementById('guiContainer');
-    guiContainer.insertBefore(gui.domElement, guiContainer.firstChild);
-    document.getElementById('reloadHint').style.display = 'none';
-
-    guiContainer.addEventListener('click', e => {
-        document.getElementById('reloadHint').style.display = gui.closed ? 'none' : '';
-    });
-}
-
 function updateFPSLabel() {
     fpsLabel.style.display = gfxSettings.showFPS ? '' : 'none';
 }
@@ -534,16 +401,6 @@ function updateNightMode(blend) {
         setNight(blend);
         preRender();
     //}
-}
-
-function setGamepadEnabled() {
-    if (gpControls) {
-        if (gamepadSettings.enabled && !gpControls.ticking) {
-            gpControls.startPolling();
-        } else if (gpControls.ticking) {
-            gpControls.stopPolling();
-        }
-    }
 }
 
 function updateShadows(value) {
@@ -618,7 +475,6 @@ function initScene() {
         scene.add(light);
         lights.push(light);
     }
-
 }
 
 function initObjects() {
@@ -757,29 +613,19 @@ function updateProgressBar( fraction ) {
 
 function onWindowResize(update = true) {
 
-    let res = { x: resolutions[gfxSettings.resolution].x, y: resolutions[gfxSettings.resolution].y };
-
-    if (res.x == 0) {
-        res.x = window.innerWidth ;
-    }
-    if (res.y == 0) {
-        res.y = window.innerHeight;
-    }
-
-    res.x = Math.min(res.x, window.innerWidth);
-    res.y = Math.min(res.y, window.innerHeight);
+    let res = { x: window.innerWidth , y: window.innerHeight };
 
     camera.aspect = res.x / res.y;
     camera.updateProjectionMatrix();
 
     // renderer.setPixelRatio(window.devicePixelRatio * scale);
-    let scale = gfxSettings.quality;
+    let scale = 1;
 
-    /*
+
     if (composer) {
         composer.setSize( res.x / scale, res.y / scale, false );
     }
-    */
+
     renderer.setSize( res.x / scale, res.y / scale, false );
     renderer.domElement.style.width = renderer.domElement.width * scale + 'px';
     renderer.domElement.style.height = renderer.domElement.height * scale + 'px';
@@ -791,24 +637,9 @@ function onWindowResize(update = true) {
     fpsLabel.style.fontSize = res.y / (40 - (30 * (1 - res.y / 1200))) + "px"; // non-linear scale for lower res.
     fpsLabel.style.lineHeight = fpsLabel.style.fontSize;
 
-    gfxSettings.fullScreen = (window.screen.width == window.innerWidth); // API not working when triggered with F11
-
     if (update) {
         preRender();
     }
-}
-
-
-function onToggleSeasonClick( ) {
-    highlightTouchControl(touchToggleSeason);
-    toggleSeason();
-    resetTouchControl(touchToggleSeason);
-}
-
-function onToggleDayNightClick( ) {
-    highlightTouchControl(touchToggleDayNight);
-    toggleDayNight();
-    resetTouchControl(touchToggleDayNight);
 }
 
 function onMouseDown(e) {
@@ -852,26 +683,26 @@ function onDocumentClick( e ) {
 
     if (pos.y > 300 && particleSystems.length < 26) {
 
-        let light = lights.splice(0, 1)[0];
-        lights.push(light);
-
-        let color = 0xffff66;
-
-        light.position.copy(pos);
-        light.color.setHex(color);
-
         let size = Math.random() * 100 + 50;
 
-        light.intensity = 1.2 * size/100;
-        ANIM.blendProperty(mixer, light, 'intensity', 0, 1.5);
+        for (let count = (Math.random() < 0.25) ? 2 : 1; count > 0; count--) {
+            let colorHex = colors[Math.floor(Math.random() * colors.length)];
 
-        particleSystems.push(PTFX.firework(scene, new THREE.Color(color), size, pos));
+            let light = lights.splice(0, 1)[0];
+            lights.push(light);
 
-        if (light.sound) {
-            if (light.sound.isPlaying) light.sound.stop();
-            light.sound.volume = size/100;
+            light.position.copy(pos);
+            light.color.setHex(colorHex);
+            light.intensity = 1.2 * size/100;
+            ANIM.blendProperty(mixer, light, 'intensity', 0, 2.5);
 
-            light.sound.play(distance / 5000);
+            particleSystems.push(PTFX.firework(scene, new THREE.Color(colorHex), size, pos));
+
+            if (light.sound) {
+                if (light.sound.isPlaying) light.sound.stop();
+                light.sound.volume = size/50;
+                light.sound.play(distance / 5000);
+            }
         }
     }
 }
@@ -908,7 +739,6 @@ function animate() {
         render();
     }
 }
-
 
 function updateControls(delta) {
 
@@ -1004,27 +834,33 @@ function preRender() {
 }
 
 function render() {
-    // checkIntersect();
-    //composer.render(scene, camera);
-
-    renderer.render( scene, camera );
-}
-
-/* View in fullscreen */
-function openFullscreen() {
-
-    if (document.body.requestFullscreen) {
-        document.body.requestFullscreen();
-    } else if (document.body.mozRequestFullScreen) { /* Firefox */
-        document.body.mozRequestFullScreen();
-    } else if (document.body.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-        document.body.webkitRequestFullscreen();
-    } else if (document.body.msRequestFullscreen) { /* IE/Edge */
-        document.body.msRequestFullscreen();
+    if (composer) {
+        composer.render(scene, camera);
+    } else {
+        renderer.render( scene, camera );
     }
 }
 
-function isFullScreen() {
-    var doc = window.document;
-    return (doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement);
+function toggleAudio(e) {
+    e.preventDefault();
+    audioSettings.enabled = !audioSettings.enabled;
+    setMasterVolume();
+
+    document.getElementById('toggleAudio').innerHTML = audioSettings.enabled ? '&#x1F507;' : '&#x1F50A;';
 }
+
+function toggleFullScreen(e) {
+    e.preventDefault();
+    var doc = window.document;
+    var docEl = doc.body;
+
+    var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+    var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+    if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+      requestFullScreen.call(docEl);
+    }
+    else {
+      cancelFullScreen.call(doc);
+    }
+  }

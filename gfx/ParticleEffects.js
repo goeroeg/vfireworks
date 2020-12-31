@@ -56,15 +56,20 @@ export function generateWind(maxValue) {
     return new Partykals.Randomizers.SphereRandomizer(maxValue, 1, new THREE.Vector3(1, 1, 1), new THREE.Vector3(-1, 0, -1), new THREE.Vector3(1, 0, 1)).generate();
 }
 
-export function firework(parent, startcolor, size, pos) {
+export function firework(parent, startColor, size, pos) {
+    let endColor = new THREE.Color().copy(startColor);
+    endColor.r *= 0.3;
+    endColor.g *= 0.1;
+    endColor.b *= 0.1;
+
     let system = new Partykals.ParticlesSystem({
         container: parent,
         particles: {
             globalSize: 15,
             //texture: tex,
             //alpha: 1,
-            startColor: startcolor,
-            endColor: new THREE.Color(0x880000),
+            startColor: startColor,
+            endColor: endColor,
             startAlpha: 1,
             endAlpha: 0,
             //startAlphaChangeAt : 0,

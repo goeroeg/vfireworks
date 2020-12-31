@@ -94,7 +94,7 @@ export function addItemSound(item, soundBuffer, loop, volume = 0.7) {
     let sound = new THREE.PositionalAudio(listener);
 
     item.add(sound);
-    sound.setBuffer(soundBuffer.buffer).setRefDistance(50).setDistanceModel('exponential').setRolloffFactor(0.8).setLoop(loop).setVolume(volume);
+    sound.setBuffer(soundBuffer.buffer).setRefDistance(50).setDistanceModel('exponential').setRolloffFactor(0.3).setLoop(loop).setVolume(volume);
     // play(sound);
 
     if (loop) {

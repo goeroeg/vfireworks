@@ -22,7 +22,7 @@
 				user-select: none;
 			    }
 
-			a:link, a:visited {
+			a:link, a:visited, #fullScreen, #toggleAudio {
 				color: white;
 				padding: 5px 5px;
 				text-align: center;
@@ -30,7 +30,7 @@
 				display: inline-block;
 				}
 
-			a:hover, a:active {
+			a:hover, a:active, #fullScreen:hover, #fullScreen:active, #toggleAudio:hover, #toggleAudio:active {
 				background-color: rgba(255,255,255,0.3);
 				}
 
@@ -66,54 +66,13 @@
 				z-index: 200;
 			}
 
-			#instructions span {
-					display: inline-block;
-					line-height: 3.5vh;
-				}
-
-			#instructions small {
-				font-size: 1.5vh;
-				}
-
-			#instructions {
-				width: 100%;
-				height: 100%;
-
-				display: -webkit-box;
-				display: -moz-box;
-				display: box;
-
-				text-shadow: 0 0 1px cyan, 0 0 5px darkcyan;
-
-				-webkit-box-orient: horizontal;
-				-moz-box-orient: horizontal;
-				box-orient: horizontal;
-
-				-webkit-box-pack: center;
-				-moz-box-pack: center;
-				box-pack: center;
-
-				-webkit-box-align: center;
-				-moz-box-align: center;
-				box-align: center;
-
-				color: #ffffff;
-				text-align: center;
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 2.5vh;
-				line-height: 2.8vh;
-
-				cursor: pointer;
-				z-index: 200;
-			}
-
-			#touchPause {
-				display: none;
+			#controlButtons {
+				display: block;
 				position: absolute;
-
-				width: 5vw;
-				height: 5vw;
-
+/*
+				width: 15%;
+				height: 5%;
+*/
 				top: 1%;
 				right: 2%;
 
@@ -126,6 +85,8 @@
 
 				z-index: 250;
 			}
+
+
 
 			#touchControls {
 				position: absolute;
@@ -269,67 +230,13 @@
 				top: 0px;
 				right: 20px;
 			}
-
-			#leftCanvas {
-				display: inherit;
-				position: absolute;
-				/* background-color: red; */
-				top: 20%;
-				left: 5px;
-				width: 35%;
-				height: 60%;
-				z-index: -1;
-			}
-
-			#rightCanvas {
-				display: inherit;
-				position: absolute;
-				/* background-color: red; */
-				top: 20%;
-				right: 5px;
-				width: 35%;
-				height: 60%;
-				z-index: -1;
-			}
 		</style>
 	</head>
 
 	<body>
 		<div id="fpsLabel">- FPS</div>
-		<div id="touchPause">&#8285;</div>
-		<div id="blocker">
-			<div id="instructions">
-				<!--
-				<span style="font-size:3vh; color: lime">A virtual nativity scene...</span>
-				<br/>
-				<span style="color: lime; font-family:monospace; font-size:2vh">v. 0.1.8</span>
-				<br/><br/>
-				<span id="clickSpan" style="font-size:4vh">&#9658; Click to explore</span>
-				<br/><br/>
-				Move:&nbsp;<span><kbd>W</kbd><br/><kbd>A</kbd>&nbsp;<kbd>S</kbd>&nbsp;<kbd>D</kbd></span>
-				&nbsp;or&nbsp;
-				<span><kbd>&#9651;</kbd><br/><kbd>&#9665;</kbd>&nbsp;<kbd>&#9661;</kbd>&nbsp;<kbd>&#9655;</kbd><br/></span>
-				<br/><br/>
-				Jump:&nbsp;<kbd>SPACE</kbd>
-				<br/><br/>
-				Toggle night:&nbsp;<kbd>N</kbd>&nbsp;, toggle season:&nbsp;<kbd>M</kbd><br/>
-				<br/>
-				Look: &#128432; mouse<br/>
-				<br/>
-				Release controls / Pause:&nbsp;<kbd>ESC</kbd>
-				<br/>
-				Toggle fullscreen:&nbsp;<kbd>F11</kbd>&nbsp;<small><i>(in most browsers)</i></small>
-				<br/><br/>
-				-->
-				<a id="infoLink" href="https://goeroeg.github.io/ld-nativity/" target="_blank">&#9432; <i>More info and licenses</i></a>
-			</div>
-			<div id="guiContainer">
-				<div id="reloadHint" style="color: lightgrey; font-family:monospace; font-size: x-small;">
-					<br/><br/>
-					params with * require reloading
-				</div>
-			</div>
-		</div>
+		<div id="controlButtons"><div id="toggleAudio">&#x1F507;</div>&nbsp;<div id="fullScreen">&#9974;</div>&nbsp;<a id="infoLink" href="https://goeroeg.github.io/ld-nativity/" target="_blank">&#9432;</a></div>
+		<div id="blocker"></div>
 		<div id="touchControls">
 			<div id="movementControls">
 				<kbd id="touchForward">&#9651;</kbd></br>
@@ -337,12 +244,6 @@
 					<kbd id="touchLeft">&#9665;</kbd>&nbsp;
 					<kbd id="touchBack">&#9661;</kbd>&nbsp;
 					<kbd id="touchRight">&#9655;</kbd>
-				</span>
-			</div>
-			<div id="miscControls">
-				<span>
-					<kbd id="touchSeason">&#9969;/&#9731;</kbd>
-					<kbd id="touchDayNight">&#9788;/&#9789;</kbd>
 				</span>
 			</div>
 			<div id="cameraControls">
