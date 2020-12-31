@@ -642,7 +642,7 @@ function onWindowResize(update = true) {
 }
 
 function onMouseDown(e) {
-    if (e.button == 1 || e.button == 2) {
+    if (e.button == 1) { //} || e.button == 2) {
         mouseMove = true;
         mouseMovePos.x = e.offsetX;
         mouseMovePos.y = e.offsetY;
@@ -650,7 +650,7 @@ function onMouseDown(e) {
 }
 
 function onMouseUp(e) {
-    if (e.button == 1 || e.button == 2) {
+    if (e.button == 1) {// || e.button == 2) {
         mouseMove = false;
     }
 }
