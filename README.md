@@ -6,7 +6,7 @@ A virtual firework minigame using three.js and partykals...
 
 ## Try it online
 
-[You can try the game online here.](https://goeroeg.github.io/vfireworks/fireworks.html)
+[You can try it online here.](https://goeroeg.github.io/vfireworks/fireworks.html)
 
 ---
 
