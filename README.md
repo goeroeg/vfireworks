@@ -6,7 +6,7 @@ A virtual firework minigame using three.js and partykals...
 
 ## Try it online
 
-[You can try the game online here.](https://goeroeg.github.io/fireworks/fireworks.html)
+[You can try the game online here.](https://goeroeg.github.io/vfireworks/fireworks.html)
 
 ---
 
@@ -16,9 +16,7 @@ The minigame should run on all modern PCs or laptops, however a dedicated graphi
 
 Online version tested with Chromium and Firefox, but you can try others with WebGL support too.
 
-Gamepad support tested with Chrome(-ium).
-
-Mobile devices are somewhat supported, Chrome for Android and Safari tested, keep the graphics settings low.
+Mobile devices are somewhat supported, Chrome for Android and Safari tested.
 
 ---
 
@@ -39,6 +37,8 @@ Have fun :)
 This project is completely non-commercial, free and just for fun.
 
 [three.js](https://threejs.org/) as MIT license (no extra attribution needed, but I think they deserve it :) )
+
+[partykals](https://github.com/RonenNess/partykals) - a great particle system library for three.js - also as MIT License
 
 ## Privacy policy
 
