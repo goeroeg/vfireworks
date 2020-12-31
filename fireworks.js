@@ -693,7 +693,7 @@ function onDocumentClick( e ) {
             light.position.copy(pos);
             light.color.setHex(colorHex);
             light.intensity = 1.2 * size/100;
-            ANIM.blendProperty(mixer, light, 'intensity', 0, 2.5);
+            ANIM.blendProperty(mixer, light, 'intensity', 0, 2.2);
 
             particleSystems.push(PTFX.firework(scene, new THREE.Color(colorHex), size, pos));
 

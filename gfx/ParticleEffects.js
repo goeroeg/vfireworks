@@ -13,7 +13,7 @@ export const starsTtl = 10;
 
 export function starsAbove(scene, intensity = 1.0) {
 
-    let tex = new THREE.TextureLoader().load( './gfx/textures/firefly.png' );
+    let tex = new THREE.TextureLoader().load( './gfx/textures/star.png' );
 
     let system = new Partykals.ParticlesSystem({
         container: scene,
