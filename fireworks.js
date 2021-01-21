@@ -841,7 +841,7 @@ function toggleAudio(e) {
     audioSettings.enabled = !audioSettings.enabled;
     setMasterVolume();
 
-    document.getElementById('toggleAudio').innerHTML = audioSettings.enabled ? '&#x1F507;' : '&#x1F50A;';
+    document.getElementById('toggleAudio').innerHTML = audioSettings.enabled ? '&#x1F50A;' : '&#x1F507;';
 }
 
 function toggleFullScreen(e) {
